@@ -1,0 +1,77 @@
+#include <STM32RTC.h>
+#include "N5110_SPI.h"
+// define USESPI in above header for HW SPI version
+
+STM32RTC& rtc = STM32RTC::getInstance();
+
+#define N5110_RST PA0
+#define N5110_DC  PA1
+#define N5110_CS  PA4
+
+N5110_SPI lcd(N5110_RST, N5110_CS, N5110_DC); // RST,CS,DC
+
+const byte seconds = 0;
+const byte minutes = 42;
+const byte hours = 18;
+
+const byte weekDay = 1;
+const byte day = 13;
+const byte month = 4;
+const byte year = 20;
+
+#if USESPI==1
+#include <SPI.h>
+#endif
+
+//#include "fonts_all.h"
+#include "small5x7bold_font.h"
+//#include "term8x14_font.h"
+//#include "digits4x7_font.h"
+#include <c64enh_font.h>
+#include <term9x14_font.h>
+
+void setup() 
+{
+  rtc.setClockSource(STM32RTC::LSE_CLOCK);
+  rtc.begin(); 
+  lcd.init();
+  lcd.clrScr();
+ 
+  rtc.setTime(hours, minutes, seconds);
+  rtc.setDate(weekDay, day, month, year);
+
+  int lday(rtc.getDay()); 
+  int lmon(rtc.getMonth());
+  int lyear(rtc.getYear());
+
+  int lhr(rtc.getHours());
+  int lmin(rtc.getMinutes());
+  int lsec(rtc.getSeconds());
+}
+
+char buf[40];
+void loop() 
+{
+ lcd.clrScr();
+ lcd.setFont(c64enh);
+ lcd.printStr(0, 0, "First Line");
+ lcd.printStr(0, 1, "Second Line");
+ delay(2000);
+
+  getTime(hours, minutes, seconds);
+  getDate(weekDay, day, month, year);
+ 
+  //rday rtc.getDay(); 
+  int lmon(rtc.getMonth());
+  int lyear(rtc.getYear());
+
+  int lhr(rtc.getHours());
+  int lmin(rtc.getMinutes());
+  int lsec(rtc.getSeconds());
+  
+  lcd.clrScr();
+  lcd.printStr(0, 1, "/");
+  lcd.printChar(10, 2, lmon);
+  
+  delay(1000);
+} 
